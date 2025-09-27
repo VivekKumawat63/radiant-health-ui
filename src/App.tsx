@@ -10,9 +10,13 @@ import HealthQuiz from "./pages/HealthQuiz";
 import AIInsights from "./pages/AIInsights";
 import Doctors from "./pages/Doctors";
 import Authorization from "./pages/Authorization";
+import Documents from "./pages/Documents";
+import HealthAwareness from "./pages/HealthAwareness";
+import Medication from "./pages/Medication";
 import DietTracker from "./pages/DietTracker";
 import WellnessReminders from "./pages/WellnessReminders";
 import HealthClassifier from "./pages/HealthClassifier";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,9 +35,13 @@ const App = () => (
             <Route path="ai-insights" element={<AIInsights />} />
             <Route path="doctors" element={<Doctors />} />
             <Route path="authorization" element={<Authorization />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="awareness" element={<HealthAwareness />} />
+            <Route path="medication" element={<Medication />} />
             <Route path="diet" element={<DietTracker />} />
             <Route path="wellness" element={<WellnessReminders />} />
             <Route path="classifier" element={<HealthClassifier />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
