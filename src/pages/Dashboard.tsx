@@ -1,16 +1,38 @@
 import { Activity, Heart, FileText, Calendar, TrendingUp, Users, Shield, Pill } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
+const createAuthorizedFetcher = (token: string | null) => async (url: string) => {
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Network response was not ok");
+  return res.json();
+};
+
 export default function Dashboard() {
-  const healthMetrics = [
-    { label: "Heart Rate", value: "72 BPM", status: "Normal", color: "success" },
-    { label: "Blood Pressure", value: "120/80", status: "Optimal", color: "success" },
-    { label: "Weight", value: "68.5 kg", status: "Healthy", color: "success" },
-    { label: "BMI", value: "22.4", status: "Normal", color: "success" },
-  ];
+  const { token, user } = useAuth();
+  const fetcher = createAuthorizedFetcher(token);
+
+  const { data: healthMetrics, isLoading: metricsLoading } = useQuery({
+    queryKey: ['healthMetrics'],
+    queryFn: () => fetcher("/api/dashboard/health-metrics"),
+    enabled: !!token,
+  });
+  const { data: healthGoals, isLoading: goalsLoading } = useQuery({
+    queryKey: ['healthGoals'],
+    queryFn: () => fetcher("/api/dashboard/health-goals"),
+    enabled: !!token,
+  });
+  const { data: recentActivities, isLoading: activitiesLoading } = useQuery({
+    queryKey: ['recentActivities'],
+    queryFn: () => fetcher("/api/dashboard/recent-activities"),
+    enabled: !!token,
+  });
 
   const quickActions = [
     { title: "Schedule Appointment", icon: Calendar, color: "primary" },
@@ -19,27 +41,20 @@ export default function Dashboard() {
     { title: "AI Health Analysis", icon: TrendingUp, color: "success" },
   ];
 
-  const recentActivities = [
-    { activity: "Blood pressure reading recorded", time: "2 hours ago", type: "measurement" },
-    { activity: "Medication reminder completed", time: "4 hours ago", type: "medication" },
-    { activity: "Health quiz completed", time: "1 day ago", type: "quiz" },
-    { activity: "Doctor appointment scheduled", time: "2 days ago", type: "appointment" },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
       <div className="bg-gradient-hero rounded-xl p-8 text-white">
         <div className="max-w-2xl">
-          <h1 className="text-3xl font-bold mb-2">Welcome back, Sarah!</h1>
+          <h1 className="text-3xl font-bold mb-2">Welcome back, {user?.name || 'User'}!</h1>
           <p className="text-white/90 text-lg">
             Your health journey continues. Here's your daily health overview and personalized insights.
           </p>
           <div className="mt-6 flex gap-4">
-            <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-white/30">
+            <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30" variant="secondary">
               View Health Report
             </Button>
-            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+            <Button className="border-white/30 text-white hover:bg-white/10" variant="outline">
               Schedule Checkup
             </Button>
           </div>
@@ -48,7 +63,7 @@ export default function Dashboard() {
 
       {/* Health Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {healthMetrics.map((metric, index) => (
+        {metricsLoading ? Array(4).fill(0).map((_: unknown, index: number) => <Card key={index} className="health-card h-28 animate-pulse bg-muted"></Card>) : healthMetrics?.map((metric: any, index: number) => (
           <Card key={index} className="health-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
@@ -56,7 +71,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{metric.value}</div>
-              <Badge variant="secondary" className="mt-2 bg-success-light text-success">
+              <Badge className="mt-2 bg-success-light text-success" variant="secondary">
                 {metric.status}
               </Badge>
             </CardContent>
@@ -73,11 +88,11 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              {quickActions.map((action, index) => (
+              {quickActions.map((action: any, index: number) => (
                 <Button
                   key={index}
-                  variant="outline"
                   className="h-20 flex-col gap-2 hover:shadow-soft transition-all duration-200"
+                  variant="outline"
                 >
                   <action.icon className="w-6 h-6" />
                   <span className="text-xs text-center">{action.title}</span>
@@ -94,27 +109,51 @@ export default function Dashboard() {
             <CardDescription>Track your wellness journey</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span>Daily Steps</span>
-                <span>7,245 / 10,000</span>
-              </div>
-              <Progress value={72} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span>Water Intake</span>
-                <span>6 / 8 glasses</span>
-              </div>
-              <Progress value={75} className="h-2" />
-            </div>
-            <div>
-              <div className="flex justify-between text-sm mb-2">
-                <span>Medication Adherence</span>
-                <span>95%</span>
-              </div>
-              <Progress value={95} className="h-2" />
-            </div>
+            {goalsLoading || !healthGoals ? (
+              <div className="h-24 animate-pulse bg-muted rounded-md"></div>
+            ) : (
+              <>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Daily Steps</span>
+                    <span>
+                      {(healthGoals.steps?.current ?? 0).toLocaleString()} / {(healthGoals.steps?.target ?? 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <Progress
+                    value={
+                      healthGoals.steps?.current && healthGoals.steps?.target
+                        ? (healthGoals.steps.current / healthGoals.steps.target) * 100
+                        : 0
+                    }
+                    className="h-2"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Water Intake</span>
+                    <span>
+                      {healthGoals.water?.current ?? 0} / {healthGoals.water?.target ?? 0} glasses
+                    </span>
+                  </div>
+                  <Progress
+                    value={
+                      healthGoals.water?.current && healthGoals.water?.target
+                        ? (healthGoals.water.current / healthGoals.water.target) * 100
+                        : 0
+                    }
+                    className="h-2"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span>Medication Adherence</span>
+                    <span>{healthGoals.adherence?.current ?? 0}%</span>
+                  </div>
+                  <Progress value={healthGoals.adherence?.current ?? 0} className="h-2" />
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -127,8 +166,8 @@ export default function Dashboard() {
             <CardDescription>Your latest health interactions</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((item, index) => (
+            <div className="space-y-4">{activitiesLoading ? <div className="h-32 animate-pulse bg-muted rounded-md"></div> :
+              recentActivities?.map((item: any, index: number) => (
                 <div key={index} className="flex items-center space-x-4">
                   <div className="w-2 h-2 bg-primary rounded-full"></div>
                   <div className="flex-1">
@@ -183,7 +222,7 @@ export default function Dashboard() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div className="border rounded-lg p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-primary">Cardiology</Badge>
+                <Badge className="text-primary" variant="outline">Cardiology</Badge>
                 <span className="text-sm text-muted-foreground">Tomorrow</span>
               </div>
               <h4 className="font-semibold">Dr. Michael Chen</h4>
@@ -192,7 +231,7 @@ export default function Dashboard() {
             </div>
             <div className="border rounded-lg p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-secondary">General</Badge>
+                <Badge className="text-secondary" variant="outline">General</Badge>
                 <span className="text-sm text-muted-foreground">Next Week</span>
               </div>
               <h4 className="font-semibold">Dr. Lisa Rodriguez</h4>
@@ -201,7 +240,7 @@ export default function Dashboard() {
             </div>
             <div className="border rounded-lg p-4 space-y-2">
               <div className="flex items-center justify-between">
-                <Badge variant="outline" className="text-warning">Dermatology</Badge>
+                <Badge className="text-warning" variant="outline">Dermatology</Badge>
                 <span className="text-sm text-muted-foreground">March 15</span>
               </div>
               <h4 className="font-semibold">Dr. James Park</h4>
