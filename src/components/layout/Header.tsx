@@ -1,4 +1,6 @@
 import { Bell, Search, User } from "lucide-react";
+import { useAuth } from "@/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,6 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Header() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   return (
     <header className="h-16 border-b border-border bg-card/50 backdrop-blur-sm flex items-center justify-between px-6">
       <div className="flex items-center gap-4">
@@ -48,9 +58,9 @@ export function Header() {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Dr. Sarah Johnson</p>
+                <p className="text-sm font-medium leading-none">{user?.user_metadata?.name || 'User'}</p>
                 <p className="text-xs leading-none text-muted-foreground">
-                  sarah.johnson@medcare.com
+                  {user?.email || 'user@medcare.com'}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -59,7 +69,7 @@ export function Header() {
             <DropdownMenuItem>Medical Preferences</DropdownMenuItem>
             <DropdownMenuItem>Privacy Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Sign Out</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>Sign Out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
