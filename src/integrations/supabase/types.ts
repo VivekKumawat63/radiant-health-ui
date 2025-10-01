@@ -14,7 +14,443 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      allergies: {
+        Row: {
+          allergen: string
+          created_at: string | null
+          id: string
+          reaction: string | null
+          severity: string | null
+          user_id: string
+        }
+        Insert: {
+          allergen: string
+          created_at?: string | null
+          id?: string
+          reaction?: string | null
+          severity?: string | null
+          user_id: string
+        }
+        Update: {
+          allergen?: string
+          created_at?: string | null
+          id?: string
+          reaction?: string | null
+          severity?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "allergies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_date: string
+          created_at: string | null
+          doctor_name: string
+          id: string
+          location: string | null
+          notes: string | null
+          specialty: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_date: string
+          created_at?: string | null
+          doctor_name: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          specialty?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_date?: string
+          created_at?: string | null
+          doctor_name?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          specialty?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diet_tracker: {
+        Row: {
+          calories: number | null
+          food_items: string | null
+          id: string
+          meal_type: string | null
+          recorded_at: string | null
+          user_id: string
+        }
+        Insert: {
+          calories?: number | null
+          food_items?: string | null
+          id?: string
+          meal_type?: string | null
+          recorded_at?: string | null
+          user_id: string
+        }
+        Update: {
+          calories?: number | null
+          food_items?: string | null
+          id?: string
+          meal_type?: string | null
+          recorded_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diet_tracker_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          created_at: string | null
+          date: string | null
+          document_type: string
+          file_url: string | null
+          id: string
+          notes: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date?: string | null
+          document_type: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string | null
+          document_type?: string
+          file_url?: string | null
+          id?: string
+          notes?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_insights: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          insight_type: string
+          severity: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          insight_type: string
+          severity?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          insight_type?: string
+          severity?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_insights_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_metrics: {
+        Row: {
+          id: string
+          metric_type: string
+          recorded_at: string | null
+          unit: string | null
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          id?: string
+          metric_type: string
+          recorded_at?: string | null
+          unit?: string | null
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          id?: string
+          metric_type?: string
+          recorded_at?: string | null
+          unit?: string | null
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_metrics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_history: {
+        Row: {
+          created_at: string | null
+          diagnosis: string | null
+          doctor_name: string | null
+          id: string
+          notes: string | null
+          record_type: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          visit_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          notes?: string | null
+          record_type: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          visit_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          diagnosis?: string | null
+          doctor_name?: string | null
+          id?: string
+          notes?: string | null
+          record_type?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          visit_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          created_at: string | null
+          dosage: string | null
+          end_date: string | null
+          frequency: string | null
+          id: string
+          name: string
+          start_date: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          name: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          dosage?: string | null
+          end_date?: string | null
+          frequency?: string | null
+          id?: string
+          name?: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          blood_type: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          blood_type?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          blood_type?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      vaccinations: {
+        Row: {
+          created_at: string | null
+          date_administered: string | null
+          id: string
+          next_dose_date: string | null
+          provider: string | null
+          user_id: string
+          vaccine_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          date_administered?: string | null
+          id?: string
+          next_dose_date?: string | null
+          provider?: string | null
+          user_id: string
+          vaccine_name: string
+        }
+        Update: {
+          created_at?: string | null
+          date_administered?: string | null
+          id?: string
+          next_dose_date?: string | null
+          provider?: string | null
+          user_id?: string
+          vaccine_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccinations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wellness_reminders: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          reminder_type: string
+          scheduled_time: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          reminder_type: string
+          scheduled_time?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          reminder_type?: string
+          scheduled_time?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wellness_reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
