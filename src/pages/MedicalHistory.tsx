@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { FileText, Download, Upload, Search, Filter, Calendar, Plus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,68 +11,66 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function MedicalHistory() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useAuth();
 
-  const medicalRecords = [
-    {
-      id: 1,
-      date: "2024-03-15",
-      type: "General Checkup",
-      doctor: "Dr. Sarah Wilson",
-      diagnosis: "Routine Health Assessment",
-      status: "Completed",
-      notes: "Patient showing excellent health indicators. Blood pressure normal, heart rate steady.",
-      attachments: ["blood_work_march_2024.pdf", "x_ray_chest.jpg"]
+  const { data: medicalRecords = [] } = useQuery({
+    queryKey: ['medicalHistory', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('medical_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('visit_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
     },
-    {
-      id: 2,
-      date: "2024-02-28",
-      type: "Cardiology",
-      doctor: "Dr. Michael Chen",
-      diagnosis: "Heart Health Monitoring",
-      status: "Completed",
-      notes: "ECG results normal. Recommended continued monitoring and regular exercise.",
-      attachments: ["ecg_february_2024.pdf"]
+    enabled: !!user?.id,
+  });
+
+  const { data: vaccinations = [] } = useQuery({
+    queryKey: ['vaccinations', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('vaccinations')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date_administered', { ascending: false });
+      if (error) throw error;
+      return data || [];
     },
-    {
-      id: 3,
-      date: "2024-02-10",
-      type: "Blood Work",
-      doctor: "Dr. Lisa Rodriguez",
-      diagnosis: "Annual Lab Panel",
-      status: "Completed",
-      notes: "All values within normal ranges. Vitamin D slightly low, supplementation recommended.",
-      attachments: ["lab_results_feb_2024.pdf"]
+    enabled: !!user?.id,
+  });
+
+  const { data: allergies = [] } = useQuery({
+    queryKey: ['allergies', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('allergies')
+        .select('*')
+        .eq('user_id', user.id);
+      if (error) throw error;
+      return data || [];
     },
-    {
-      id: 4,
-      date: "2024-01-22",
-      type: "Dermatology",
-      doctor: "Dr. James Park",
-      diagnosis: "Skin Assessment",
-      status: "Follow-up Required",
-      notes: "Minor skin irritation observed. Prescribed topical treatment. Follow-up in 6 weeks.",
-      attachments: ["dermoscopy_images.jpg", "prescription_jan_2024.pdf"]
-    }
-  ];
+    enabled: !!user?.id,
+  });
 
-  const vaccinations = [
-    { name: "COVID-19 Booster", date: "2024-01-15", status: "Up to date", nextDue: "2025-01-15" },
-    { name: "Influenza", date: "2023-10-20", status: "Up to date", nextDue: "2024-10-20" },
-    { name: "Tdap", date: "2022-06-10", status: "Current", nextDue: "2032-06-10" },
-    { name: "MMR", date: "1995-05-15", status: "Lifetime", nextDue: "N/A" }
-  ];
-
-  const allergies = [
-    { allergen: "Penicillin", severity: "Severe", reaction: "Anaphylaxis", dateIdentified: "2010-03-15" },
-    { allergen: "Peanuts", severity: "Moderate", reaction: "Hives, Swelling", dateIdentified: "2008-07-22" },
-    { allergen: "Shellfish", severity: "Mild", reaction: "Digestive Issues", dateIdentified: "2012-11-08" }
-  ];
-
-  const medications = [
-    { name: "Lisinopril", dosage: "10mg", frequency: "Once daily", prescribedBy: "Dr. Michael Chen", startDate: "2024-01-10" },
-    { name: "Vitamin D3", dosage: "2000 IU", frequency: "Once daily", prescribedBy: "Dr. Lisa Rodriguez", startDate: "2024-02-15" },
-    { name: "Omega-3", dosage: "1000mg", frequency: "Twice daily", prescribedBy: "Dr. Sarah Wilson", startDate: "2024-03-01" }
-  ];
+  const { data: medications = [] } = useQuery({
+    queryKey: ['medications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('medications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -144,117 +145,139 @@ export default function MedicalHistory() {
         </TabsList>
 
         <TabsContent value="records" className="space-y-4">
-          {medicalRecords.map((record) => (
-            <Card key={record.id} className="health-card">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
-                      {record.type}
-                    </CardTitle>
-                    <CardDescription>{record.doctor} • {record.date}</CardDescription>
-                  </div>
-                  <Badge variant={getStatusColor(record.status) as any}>
-                    {record.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold mb-2">Diagnosis</h4>
-                    <p className="text-sm text-muted-foreground">{record.diagnosis}</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Notes</h4>
-                    <p className="text-sm text-muted-foreground">{record.notes}</p>
-                  </div>
-                  {record.attachments.length > 0 && (
+          {medicalRecords.length > 0 ? (
+            medicalRecords.map((record) => (
+              <Card key={record.id} className="health-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-semibold mb-2">Attachments</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {record.attachments.map((attachment, index) => (
-                          <Button key={index} variant="outline" size="sm" className="gap-2">
-                            <Download className="w-3 h-3" />
-                            {attachment}
-                          </Button>
-                        ))}
-                      </div>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        {record.record_type}
+                      </CardTitle>
+                      <CardDescription>
+                        {record.doctor_name} • {record.visit_date ? new Date(record.visit_date).toLocaleDateString() : 'No date'}
+                      </CardDescription>
                     </div>
-                  )}
-                </div>
+                    <Badge variant={getStatusColor(record.status) as any}>
+                      {record.status}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-semibold mb-2">Diagnosis</h4>
+                      <p className="text-sm text-muted-foreground">{record.diagnosis}</p>
+                    </div>
+                    {record.notes && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Notes</h4>
+                        <p className="text-sm text-muted-foreground">{record.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card className="health-card">
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                No medical records found. Click "Add Entry" to create your first record.
               </CardContent>
             </Card>
-          ))}
+          )}
         </TabsContent>
 
         <TabsContent value="medications" className="space-y-4">
           <div className="grid gap-4">
-            {medications.map((medication, index) => (
-              <Card key={index} className="health-card">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg">{medication.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {medication.dosage} • {medication.frequency}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Prescribed by {medication.prescribedBy} on {medication.startDate}
-                      </p>
+            {medications.length > 0 ? (
+              medications.map((medication: any, index) => (
+                <Card key={index} className="health-card">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-2">
+                        <h3 className="font-semibold text-lg">{medication.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {medication.dosage} • {medication.frequency}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Started on {medication.start_date ? new Date(medication.start_date).toLocaleDateString() : 'Unknown'}
+                        </p>
+                      </div>
+                      <Badge variant="secondary">{medication.status}</Badge>
                     </div>
-                    <Badge variant="secondary">Active</Badge>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="health-card">
+                <CardContent className="pt-6 text-center text-muted-foreground">
+                  No medications found
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="allergies" className="space-y-4">
           <div className="grid gap-4">
-            {allergies.map((allergy, index) => (
-              <Card key={index} className="health-card">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg">{allergy.allergen}</h3>
-                      <p className="text-sm text-muted-foreground">{allergy.reaction}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Identified: {allergy.dateIdentified}
-                      </p>
+            {allergies.length > 0 ? (
+              allergies.map((allergy: any, index) => (
+                <Card key={index} className="health-card">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-2">
+                        <h3 className="font-semibold text-lg">{allergy.allergen}</h3>
+                        <p className="text-sm text-muted-foreground">{allergy.reaction}</p>
+                      </div>
+                      <Badge variant={getSeverityColor(allergy.severity) as any}>
+                        {allergy.severity}
+                      </Badge>
                     </div>
-                    <Badge variant={getSeverityColor(allergy.severity) as any}>
-                      {allergy.severity}
-                    </Badge>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="health-card">
+                <CardContent className="pt-6 text-center text-muted-foreground">
+                  No allergies recorded
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="vaccinations" className="space-y-4">
           <div className="grid gap-4">
-            {vaccinations.map((vaccination, index) => (
-              <Card key={index} className="health-card">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg">{vaccination.name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Last: {vaccination.date}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Next due: {vaccination.nextDue}
-                      </p>
+            {vaccinations.length > 0 ? (
+              vaccinations.map((vaccination: any, index) => (
+                <Card key={index} className="health-card">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-2">
+                        <h3 className="font-semibold text-lg">{vaccination.vaccine_name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Last: {vaccination.date_administered ? new Date(vaccination.date_administered).toLocaleDateString() : 'Unknown'}
+                        </p>
+                        {vaccination.next_dose_date && (
+                          <p className="text-xs text-muted-foreground">
+                            Next due: {new Date(vaccination.next_dose_date).toLocaleDateString()}
+                          </p>
+                        )}
+                      </div>
+                      <Badge variant="secondary">Up to date</Badge>
                     </div>
-                    <Badge variant="secondary">{vaccination.status}</Badge>
-                  </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <Card className="health-card">
+                <CardContent className="pt-6 text-center text-muted-foreground">
+                  No vaccinations recorded
                 </CardContent>
               </Card>
-            ))}
+            )}
           </div>
         </TabsContent>
       </Tabs>

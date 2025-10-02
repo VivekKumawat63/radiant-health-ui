@@ -1,37 +1,61 @@
 import { Activity, Heart, FileText, Calendar, TrendingUp, Users, Shield, Pill } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
-const createAuthorizedFetcher = (token: string | null) => async (url: string) => {
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error("Network response was not ok");
-  return res.json();
-};
-
 export default function Dashboard() {
-  const { token, user } = useAuth();
-  const fetcher = createAuthorizedFetcher(token);
+  const { user } = useAuth();
 
   const { data: healthMetrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ['healthMetrics'],
-    queryFn: () => fetcher("/api/dashboard/health-metrics"),
-    enabled: !!token,
+    queryKey: ['healthMetrics', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('health_metrics')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('recorded_at', { ascending: false })
+        .limit(4);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
-  const { data: healthGoals, isLoading: goalsLoading } = useQuery({
-    queryKey: ['healthGoals'],
-    queryFn: () => fetcher("/api/dashboard/health-goals"),
-    enabled: !!token,
+
+  const { data: appointments, isLoading: appointmentsLoading } = useQuery({
+    queryKey: ['appointments', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('appointment_date', new Date().toISOString())
+        .order('appointment_date', { ascending: true })
+        .limit(3);
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
-  const { data: recentActivities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['recentActivities'],
-    queryFn: () => fetcher("/api/dashboard/recent-activities"),
-    enabled: !!token,
+
+  const { data: medications, isLoading: medicationsLoading } = useQuery({
+    queryKey: ['medications', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return [];
+      const { data, error } = await supabase
+        .from('medications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active');
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user?.id,
   });
 
   const quickActions = [
@@ -63,20 +87,34 @@ export default function Dashboard() {
 
       {/* Health Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metricsLoading ? Array(4).fill(0).map((_: unknown, index: number) => <Card key={index} className="health-card h-28 animate-pulse bg-muted"></Card>) : healthMetrics?.map((metric: any, index: number) => (
-          <Card key={index} className="health-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
-              <Heart className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{metric.value}</div>
-              <Badge className="mt-2 bg-success-light text-success" variant="secondary">
-                {metric.status}
-              </Badge>
+        {metricsLoading ? (
+          Array(4).fill(0).map((_: unknown, index: number) => (
+            <Card key={index} className="health-card h-28 animate-pulse bg-muted"></Card>
+          ))
+        ) : healthMetrics && healthMetrics.length > 0 ? (
+          healthMetrics.map((metric: any) => (
+            <Card key={metric.id} className="health-card">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{metric.metric_type}</CardTitle>
+                <Heart className="w-4 h-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {metric.value} {metric.unit}
+                </div>
+                <Badge className="mt-2 bg-success-light text-success" variant="secondary">
+                  Normal
+                </Badge>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card className="health-card col-span-full">
+            <CardContent className="pt-6 text-center text-muted-foreground">
+              No health metrics recorded yet. Start tracking your health!
             </CardContent>
           </Card>
-        ))}
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -102,80 +140,65 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Health Goals */}
+        {/* Active Medications */}
         <Card className="health-card">
           <CardHeader>
-            <CardTitle>Health Goals Progress</CardTitle>
-            <CardDescription>Track your wellness journey</CardDescription>
+            <CardTitle>Active Medications</CardTitle>
+            <CardDescription>Current medication regimen</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {goalsLoading || !healthGoals ? (
+            {medicationsLoading ? (
               <div className="h-24 animate-pulse bg-muted rounded-md"></div>
+            ) : medications && medications.length > 0 ? (
+              medications.map((med: any) => (
+                <div key={med.id} className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">{med.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {med.dosage} • {med.frequency}
+                    </p>
+                  </div>
+                  <Badge variant="secondary">{med.status}</Badge>
+                </div>
+              ))
             ) : (
-              <>
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Daily Steps</span>
-                    <span>
-                      {(healthGoals.steps?.current ?? 0).toLocaleString()} / {(healthGoals.steps?.target ?? 0).toLocaleString()}
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      healthGoals.steps?.current && healthGoals.steps?.target
-                        ? (healthGoals.steps.current / healthGoals.steps.target) * 100
-                        : 0
-                    }
-                    className="h-2"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Water Intake</span>
-                    <span>
-                      {healthGoals.water?.current ?? 0} / {healthGoals.water?.target ?? 0} glasses
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      healthGoals.water?.current && healthGoals.water?.target
-                        ? (healthGoals.water.current / healthGoals.water.target) * 100
-                        : 0
-                    }
-                    className="h-2"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span>Medication Adherence</span>
-                    <span>{healthGoals.adherence?.current ?? 0}%</span>
-                  </div>
-                  <Progress value={healthGoals.adherence?.current ?? 0} className="h-2" />
-                </div>
-              </>
+              <p className="text-sm text-muted-foreground text-center">
+                No active medications
+              </p>
             )}
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
+        {/* Upcoming Appointments Summary */}
         <Card className="health-card lg:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Your latest health interactions</CardDescription>
+            <CardTitle>Upcoming Appointments</CardTitle>
+            <CardDescription>Your scheduled consultations</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">{activitiesLoading ? <div className="h-32 animate-pulse bg-muted rounded-md"></div> :
-              recentActivities?.map((item: any, index: number) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <div className="w-2 h-2 bg-primary rounded-full"></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{item.activity}</p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
+            <div className="space-y-4">
+              {appointmentsLoading ? (
+                <div className="h-32 animate-pulse bg-muted rounded-md"></div>
+              ) : appointments && appointments.length > 0 ? (
+                appointments.map((apt: any) => (
+                  <div key={apt.id} className="flex items-center space-x-4 border-b pb-4 last:border-0">
+                    <Calendar className="w-8 h-8 text-primary" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{apt.doctor_name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {apt.specialty} • {new Date(apt.appointment_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge variant="outline">{apt.status}</Badge>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No upcoming appointments scheduled
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -209,47 +232,6 @@ export default function Dashboard() {
         </Card>
       </div>
 
-      {/* Upcoming Appointments */}
-      <Card className="health-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Upcoming Appointments
-          </CardTitle>
-          <CardDescription>Your scheduled medical consultations</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge className="text-primary" variant="outline">Cardiology</Badge>
-                <span className="text-sm text-muted-foreground">Tomorrow</span>
-              </div>
-              <h4 className="font-semibold">Dr. Michael Chen</h4>
-              <p className="text-sm text-muted-foreground">Heart Health Checkup</p>
-              <p className="text-sm">10:30 AM - 11:00 AM</p>
-            </div>
-            <div className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge className="text-secondary" variant="outline">General</Badge>
-                <span className="text-sm text-muted-foreground">Next Week</span>
-              </div>
-              <h4 className="font-semibold">Dr. Lisa Rodriguez</h4>
-              <p className="text-sm text-muted-foreground">Annual Physical</p>
-              <p className="text-sm">2:00 PM - 3:00 PM</p>
-            </div>
-            <div className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <Badge className="text-warning" variant="outline">Dermatology</Badge>
-                <span className="text-sm text-muted-foreground">March 15</span>
-              </div>
-              <h4 className="font-semibold">Dr. James Park</h4>
-              <p className="text-sm text-muted-foreground">Skin Assessment</p>
-              <p className="text-sm">9:00 AM - 9:30 AM</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
