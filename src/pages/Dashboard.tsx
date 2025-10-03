@@ -238,6 +238,16 @@ export default function Dashboard() {
                   <span className="text-muted-foreground">0%</span>
                 </div>
               </div>
+              <div className="flex flex-col gap-2 mt-6">
+                <Button className="w-full gap-2" onClick={() => navigate('/health-classifier')}>
+                  <Activity className="w-4 h-4" />
+                  Add Health Data
+                </Button>
+                <Button variant="outline" className="w-full gap-2" onClick={() => navigate('/medical-history')}>
+                  <FileText className="w-4 h-4" />
+                  View History
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

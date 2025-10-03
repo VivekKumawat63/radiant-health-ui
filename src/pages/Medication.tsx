@@ -11,134 +11,20 @@ import { Switch } from "@/components/ui/switch";
 export default function Medication() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const currentMedications = [
-    {
-      id: 1,
-      name: "Lisinopril",
-      dosage: "10mg",
-      frequency: "Once daily",
-      timeOfDay: "Morning (8:00 AM)",
-      prescribedBy: "Dr. Michael Chen",
-      startDate: "2024-01-10",
-      endDate: null,
-      purpose: "Blood pressure management",
-      sideEffects: ["Dizziness", "Dry cough", "Fatigue"],
-      instructions: "Take with or without food. Avoid potassium supplements.",
-      adherence: 95,
-      remainingDoses: 28,
-      nextRefill: "2024-04-10",
-      active: true
-    },
-    {
-      id: 2,
-      name: "Vitamin D3",
-      dosage: "2000 IU",
-      frequency: "Once daily",
-      timeOfDay: "Morning (8:00 AM)",
-      prescribedBy: "Dr. Lisa Rodriguez",
-      startDate: "2024-02-15",
-      endDate: null,
-      purpose: "Vitamin D deficiency",
-      sideEffects: ["Mild nausea", "Constipation"],
-      instructions: "Take with food for better absorption.",
-      adherence: 88,
-      remainingDoses: 45,
-      nextRefill: "2024-05-15",
-      active: true
-    },
-    {
-      id: 3,
-      name: "Omega-3 Fish Oil",
-      dosage: "1000mg",
-      frequency: "Twice daily",
-      timeOfDay: "Morning & Evening",
-      prescribedBy: "Dr. Sarah Wilson",
-      startDate: "2024-03-01",
-      endDate: null,
-      purpose: "Heart health support",
-      sideEffects: ["Fishy aftertaste", "Mild stomach upset"],
-      instructions: "Take with meals to reduce stomach upset.",
-      adherence: 92,
-      remainingDoses: 54,
-      nextRefill: "2024-04-30",
-      active: true
-    }
-  ];
+  const currentMedications: any[] = [];
 
-  const medicationHistory = [
-    {
-      id: 4,
-      name: "Ibuprofen",
-      dosage: "400mg",
-      frequency: "As needed",
-      prescribedBy: "Dr. James Park",
-      startDate: "2024-02-20",
-      endDate: "2024-03-05",
-      purpose: "Joint pain relief",
-      reason: "Completed treatment course",
-      active: false
-    },
-    {
-      id: 5,
-      name: "Antibiotics (Amoxicillin)",
-      dosage: "500mg",
-      frequency: "Three times daily",
-      prescribedBy: "Dr. Emily Thompson",
-      startDate: "2024-01-15",
-      endDate: "2024-01-25",
-      purpose: "Bacterial infection",
-      reason: "Completed antibiotic course",
-      active: false
-    }
-  ];
+  const medicationHistory: any[] = [];
 
-  const upcomingReminders = [
-    {
-      medication: "Lisinopril",
-      time: "8:00 AM",
-      dosage: "10mg",
-      status: "due",
-      hoursUntil: 2
-    },
-    {
-      medication: "Omega-3 Fish Oil",
-      time: "8:00 AM",
-      dosage: "1000mg",
-      status: "due",
-      hoursUntil: 2
-    },
-    {
-      medication: "Omega-3 Fish Oil",
-      time: "8:00 PM",
-      dosage: "1000mg",
-      status: "scheduled",
-      hoursUntil: 14
-    },
-    {
-      medication: "Vitamin D3",
-      time: "8:00 AM",
-      dosage: "2000 IU",
-      status: "due",
-      hoursUntil: 2
-    }
-  ];
+  const upcomingReminders: any[] = [];
 
-  const medicationInteractions = [
-    {
-      medication1: "Lisinopril",
-      medication2: "Ibuprofen",
-      severity: "Moderate",
-      description: "NSAIDs like Ibuprofen may reduce the effectiveness of blood pressure medications.",
-      recommendation: "Monitor blood pressure closely when using both medications."
-    }
-  ];
+  const medicationInteractions: any[] = [];
 
   const adherenceStats = {
-    overall: 92,
-    thisWeek: 95,
-    thisMonth: 89,
-    missedDoses: 3,
-    onTimePercentage: 87
+    overall: 0,
+    thisWeek: 0,
+    thisMonth: 0,
+    missedDoses: 0,
+    onTimePercentage: 0
   };
 
   const getAdherenceColor = (percentage: number) => {
@@ -249,210 +135,43 @@ export default function Medication() {
         </TabsList>
 
         <TabsContent value="current" className="space-y-4">
-          <div className="grid gap-4">
-            {currentMedications.map((medication) => (
-              <Card key={medication.id} className="health-card">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Pill className="w-6 h-6 text-primary" />
-                      <div>
-                        <CardTitle className="text-lg">{medication.name}</CardTitle>
-                        <CardDescription>
-                          {medication.dosage} • {medication.frequency} • {medication.timeOfDay}
-                        </CardDescription>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary">Active</Badge>
-                      <Switch checked={medication.active} />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold mb-2">Medication Details</h4>
-                        <div className="space-y-2 text-sm">
-                          <div><strong>Purpose:</strong> {medication.purpose}</div>
-                          <div><strong>Prescribed by:</strong> {medication.prescribedBy}</div>
-                          <div><strong>Started:</strong> {medication.startDate}</div>
-                          <div><strong>Instructions:</strong> {medication.instructions}</div>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-2">Possible Side Effects</h4>
-                        <div className="flex flex-wrap gap-1">
-                          {medication.sideEffects.map((effect, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {effect}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Adherence Rate</span>
-                          <span className="font-semibold">{medication.adherence}%</span>
-                        </div>
-                        <Progress value={medication.adherence} className="h-2" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                          <div className="text-lg font-bold text-primary">{medication.remainingDoses}</div>
-                          <div className="text-xs text-muted-foreground">Doses Left</div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold">{medication.nextRefill}</div>
-                          <div className="text-xs text-muted-foreground">Next Refill</div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="flex-1">
-                          Edit
-                        </Button>
-                        <Button size="sm" variant="outline" className="flex-1">
-                          Refill Request
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="text-center py-12">
+            <Pill className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Medications Yet</h3>
+            <p className="text-muted-foreground mb-6">Start tracking your medications to manage your health better</p>
+            <Button className="gap-2">
+              <Plus className="w-4 h-4" />
+              Add First Medication
+            </Button>
           </div>
         </TabsContent>
 
         <TabsContent value="reminders" className="space-y-4">
-          <Card className="health-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="w-5 h-5" />
-                Today's Medication Schedule
-              </CardTitle>
-              <CardDescription>Upcoming doses and reminders</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {upcomingReminders.map((reminder, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Pill className="w-5 h-5 text-primary" />
-                      <div>
-                        <h4 className="font-semibold">{reminder.medication}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {reminder.dosage} at {reminder.time}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {reminder.hoursUntil} hours remaining
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={getStatusColor(reminder.status) as any}>
-                        {reminder.status}
-                      </Badge>
-                      {reminder.status === 'due' && (
-                        <Button size="sm" className="gap-2">
-                          <CheckCircle className="w-4 h-4" />
-                          Mark Taken
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-center py-12">
+            <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Reminders Set</h3>
+            <p className="text-muted-foreground mb-6">Set medication reminders to never miss a dose</p>
+            <Button variant="outline" className="gap-2">
+              <Bell className="w-4 h-4" />
+              Set First Reminder
+            </Button>
+          </div>
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
-          <div className="grid gap-4">
-            {medicationHistory.map((medication) => (
-              <Card key={medication.id} className="health-card">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Pill className="w-5 h-5 text-muted-foreground" />
-                      <div>
-                        <h4 className="font-semibold">{medication.name}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {medication.dosage} • {medication.frequency}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {medication.startDate} - {medication.endDate}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline">Completed</Badge>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {medication.reason}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div><strong>Purpose:</strong> {medication.purpose}</div>
-                      <div><strong>Prescribed by:</strong> {medication.prescribedBy}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="text-center py-12">
+            <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Medication History</h3>
+            <p className="text-muted-foreground">Your past medications will appear here</p>
           </div>
         </TabsContent>
 
         <TabsContent value="interactions" className="space-y-4">
-          <Card className="health-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-warning" />
-                Drug Interactions
-              </CardTitle>
-              <CardDescription>Potential interactions between your medications</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {medicationInteractions.length > 0 ? (
-                <div className="space-y-4">
-                  {medicationInteractions.map((interaction, index) => (
-                    <div key={index} className="border rounded-lg p-4 bg-yellow-50 border-yellow-200">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">
-                            {interaction.medication1} + {interaction.medication2}
-                          </h4>
-                        </div>
-                        <Badge variant={getSeverityColor(interaction.severity) as any}>
-                          {interaction.severity} Risk
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {interaction.description}
-                      </p>
-                      <div className="bg-white/60 p-3 rounded-lg">
-                        <h5 className="font-medium text-sm mb-1">Recommendation:</h5>
-                        <p className="text-sm text-muted-foreground">
-                          {interaction.recommendation}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
-                  <h3 className="font-semibold text-green-600 mb-2">No Interactions Detected</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Your current medications have no known harmful interactions.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="text-center py-12">
+            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-green-600 mb-2">No Interactions to Check</h3>
+            <p className="text-muted-foreground">Add medications to check for potential drug interactions</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

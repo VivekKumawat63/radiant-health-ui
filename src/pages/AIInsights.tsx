@@ -109,8 +109,9 @@ export default function AIInsights() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     <p className="text-sm text-muted-foreground">{insight.description}</p>
+                    <Button size="sm" className="w-full">Take Action</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -143,8 +144,9 @@ export default function AIInsights() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     <p className="text-sm text-muted-foreground">{prediction.description}</p>
+                    <Button size="sm" variant="outline" className="w-full">Learn More</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -177,8 +179,12 @@ export default function AIInsights() {
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-3">
                     <p className="text-sm text-muted-foreground">{alert.description}</p>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="destructive" className="flex-1">Contact Doctor</Button>
+                      <Button size="sm" variant="outline" className="flex-1">View Details</Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
