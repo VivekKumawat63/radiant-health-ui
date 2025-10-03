@@ -8,14 +8,21 @@ import { supabase } from "@/integrations/supabase/client";
 export default function Doctors() {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch doctors from profiles table
+  // Fetch verified doctors from doctor_profiles table
   const { data: doctors = [], isLoading } = useQuery({
-    queryKey: ['doctors'],
+    queryKey: ['verified-doctors'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'doctor');
+        .from('doctor_profiles')
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            email,
+            phone
+          )
+        `)
+        .eq('verified_status', 'verified');
       
       if (error) throw error;
       return data || [];
@@ -24,8 +31,10 @@ export default function Doctors() {
 
   // Filter doctors based on search
   const filteredDoctors = doctors.filter(doctor => {
-    const matchesSearch = doctor.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doctor.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const profile = doctor.profiles as any;
+    const matchesSearch = profile?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         profile?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         doctor.specializations?.some((s: string) => s.toLowerCase().includes(searchTerm.toLowerCase()));
     return matchesSearch;
   });
 
@@ -71,28 +80,81 @@ export default function Doctors() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDoctors.map((doctor) => (
-            <Card key={doctor.id} className="health-card">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xl font-semibold text-primary">
-                        {doctor.full_name?.charAt(0) || 'D'}
-                      </span>
+          {filteredDoctors.map((doctor) => {
+            const profile = doctor.profiles as any;
+            return (
+              <Card key={doctor.id} className="health-card hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-2xl font-semibold text-primary">
+                          {profile?.full_name?.charAt(0) || 'D'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">Dr. {profile?.full_name || 'Unknown'}</h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-sm text-muted-foreground">
+                            {doctor.rating > 0 ? `⭐ ${doctor.rating}` : 'New'}
+                          </span>
+                          <span className="text-sm text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground">
+                            {doctor.experience_years} yrs exp
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{doctor.full_name || 'Unknown Doctor'}</h3>
-                      <p className="text-sm text-muted-foreground">{doctor.email}</p>
-                      {doctor.phone && (
-                        <p className="text-sm text-muted-foreground">{doctor.phone}</p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-1">
+                        {doctor.specializations?.slice(0, 2).map((spec: string) => (
+                          <span key={spec} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                            {spec}
+                          </span>
+                        ))}
+                        {doctor.specializations?.length > 2 && (
+                          <span className="text-xs bg-muted px-2 py-1 rounded">
+                            +{doctor.specializations.length - 2}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {doctor.clinic_address && (
+                        <p className="text-sm text-muted-foreground flex items-start gap-1">
+                          <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <span className="line-clamp-2">{doctor.clinic_address}</span>
+                        </p>
                       )}
+                      
+                      {doctor.consultation_fee && (
+                        <p className="text-sm font-semibold">
+                          Consultation Fee: ${doctor.consultation_fee}
+                        </p>
+                      )}
+                      
+                      <div className="flex gap-2 text-xs text-muted-foreground">
+                        {doctor.teleconsult_available && (
+                          <span className="flex items-center gap-1">
+                            📹 Teleconsult
+                          </span>
+                        )}
+                        {doctor.languages?.length > 0 && (
+                          <span>
+                            💬 {doctor.languages.join(', ')}
+                          </span>
+                        )}
+                      </div>
                     </div>
+                    
+                    {profile?.email && (
+                      <p className="text-xs text-muted-foreground">{profile.email}</p>
+                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

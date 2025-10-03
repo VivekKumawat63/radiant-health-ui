@@ -27,6 +27,13 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // For doctors, redirect to detailed registration page
+    if (role === 'doctor') {
+      navigate('/doctor/register');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -38,7 +45,7 @@ export default function Register() {
 
       toast({
         title: 'Registration Successful',
-        description: `Welcome! Your ${role} account has been created.`,
+        description: 'Welcome! Your account has been created.',
       });
       navigate('/login');
     } catch (error: any) {
@@ -121,7 +128,7 @@ export default function Register() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button className="w-full" type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Create Account'}
+              {role === 'doctor' ? 'Continue to Doctor Registration' : isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{' '}

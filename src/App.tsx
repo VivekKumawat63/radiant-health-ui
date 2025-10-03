@@ -22,6 +22,10 @@ import WellnessReminders from "@/pages/WellnessReminders";
 import HealthClassifier from "@/pages/HealthClassifier";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/NotFound";
+import DoctorRegister from "@/pages/DoctorRegister";
+import DoctorVerificationStatus from "@/pages/DoctorVerificationStatus";
+import DoctorDashboard from "@/pages/DoctorDashboard";
+import Index from "@/pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -33,11 +37,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/doctor/register" element={<DoctorRegister />} />
             <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<MainLayout />}>
-                <Route index element={<Dashboard />} />
+              <Route path="/doctor/verification-status" element={<DoctorVerificationStatus />} />
+              <Route element={<MainLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
                 <Route path="medical-history" element={<MedicalHistory />} />
                 <Route path="health-quiz" element={<HealthQuiz />} />
                 <Route path="ai-insights" element={<AIInsights />} />

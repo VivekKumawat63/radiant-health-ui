@@ -93,6 +93,86 @@ export type Database = {
           },
         ]
       }
+      audits: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      consent_logs: {
+        Row: {
+          consent_given: boolean
+          consent_type: string
+          created_at: string | null
+          doctor_id: string
+          expires_at: string | null
+          id: string
+          patient_id: string
+          purpose: string | null
+          revoked_at: string | null
+        }
+        Insert: {
+          consent_given: boolean
+          consent_type: string
+          created_at?: string | null
+          doctor_id: string
+          expires_at?: string | null
+          id?: string
+          patient_id: string
+          purpose?: string | null
+          revoked_at?: string | null
+        }
+        Update: {
+          consent_given?: boolean
+          consent_type?: string
+          created_at?: string | null
+          doctor_id?: string
+          expires_at?: string | null
+          id?: string
+          patient_id?: string
+          purpose?: string | null
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_logs_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       diet_tracker: {
         Row: {
           calories: number | null
@@ -127,6 +207,122 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      doctor_credentials: {
+        Row: {
+          credential_type: string
+          doctor_id: string
+          extracted_data: Json | null
+          file_name: string
+          file_url: string
+          id: string
+          uploaded_at: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          credential_type: string
+          doctor_id: string
+          extracted_data?: Json | null
+          file_name: string
+          file_url: string
+          id?: string
+          uploaded_at?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          credential_type?: string
+          doctor_id?: string
+          extracted_data?: Json | null
+          file_name?: string
+          file_url?: string
+          id?: string
+          uploaded_at?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_credentials_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctor_profiles: {
+        Row: {
+          bio: string | null
+          clinic_address: string | null
+          clinic_latitude: number | null
+          clinic_longitude: number | null
+          consultation_fee: number | null
+          created_at: string | null
+          experience_years: number
+          id: string
+          languages: string[]
+          rating: number | null
+          specializations: string[]
+          teleconsult_available: boolean | null
+          total_consultations: number | null
+          updated_at: string | null
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+          verified_status: string | null
+          verifier_notes: string | null
+          working_hours: Json | null
+        }
+        Insert: {
+          bio?: string | null
+          clinic_address?: string | null
+          clinic_latitude?: number | null
+          clinic_longitude?: number | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          experience_years: number
+          id?: string
+          languages: string[]
+          rating?: number | null
+          specializations: string[]
+          teleconsult_available?: boolean | null
+          total_consultations?: number | null
+          updated_at?: string | null
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verified_status?: string | null
+          verifier_notes?: string | null
+          working_hours?: Json | null
+        }
+        Update: {
+          bio?: string | null
+          clinic_address?: string | null
+          clinic_latitude?: number | null
+          clinic_longitude?: number | null
+          consultation_fee?: number | null
+          created_at?: string | null
+          experience_years?: number
+          id?: string
+          languages?: string[]
+          rating?: number | null
+          specializations?: string[]
+          teleconsult_available?: boolean | null
+          total_consultations?: number | null
+          updated_at?: string | null
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          verified_status?: string | null
+          verifier_notes?: string | null
+          working_hours?: Json | null
+        }
+        Relationships: []
       }
       documents: {
         Row: {
@@ -375,6 +571,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       vaccinations: {
         Row: {
           created_at: string | null
@@ -459,9 +676,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "doctor" | "patient"
       user_role: "patient" | "doctor"
     }
     CompositeTypes: {
@@ -590,6 +814,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "doctor", "patient"],
       user_role: ["patient", "doctor"],
     },
   },
