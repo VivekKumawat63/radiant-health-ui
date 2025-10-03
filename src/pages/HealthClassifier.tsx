@@ -185,8 +185,15 @@ export default function HealthClassifier() {
                 Your symptom analyses will appear here once you start using the analyzer.
               </p>
               <Button onClick={() => {
-                const analyzerTab = document.querySelector('[value="analyzer"]') as HTMLElement;
-                if (analyzerTab) analyzerTab.click();
+                // Switch to analyzer tab programmatically
+                const analyzerTab = document.querySelector('[data-state="inactive"][value="analyzer"]') as HTMLElement;
+                if (analyzerTab) {
+                  analyzerTab.click();
+                } else {
+                  // If already on analyzer tab or fallback
+                  const tabTrigger = document.querySelectorAll('[role="tab"]')[0] as HTMLElement;
+                  if (tabTrigger) tabTrigger.click();
+                }
               }}>
                 Start First Analysis
               </Button>

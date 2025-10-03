@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Bell, Plus } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { useAuth } from "@/AuthContext";
 
 export default function WellnessReminders() {
   const { user } = useAuth();
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   // Fetch wellness reminders
   const { data: reminders = [], isLoading } = useQuery({
@@ -27,13 +29,18 @@ export default function WellnessReminders() {
 
   const activeReminders = reminders.filter(r => r.is_active);
 
+  const handleAddReminder = () => {
+    // For now, just show an alert. This can be expanded to open a dialog/form
+    alert('Add Reminder feature coming soon! This will open a form to create a new wellness reminder.');
+  };
+
   const EmptyState = ({ message }: { message: string }) => (
     <Card className="health-card">
       <CardContent className="py-12 text-center">
         <Bell className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
         <h3 className="text-xl font-semibold mb-2">No Reminders Set</h3>
         <p className="text-muted-foreground mb-4">{message}</p>
-        <Button>
+        <Button onClick={handleAddReminder}>
           <Plus className="w-4 h-4 mr-2" />
           Add Your First Reminder
         </Button>
@@ -49,7 +56,7 @@ export default function WellnessReminders() {
           <h1 className="text-3xl font-bold gradient-text">Wellness Reminders</h1>
           <p className="text-muted-foreground">Set and manage your health reminders and daily goals</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleAddReminder}>
           <Plus className="w-4 h-4" />
           Add Reminder
         </Button>
