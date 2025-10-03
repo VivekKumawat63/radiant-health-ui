@@ -184,7 +184,10 @@ export default function HealthClassifier() {
               <p className="text-muted-foreground mb-4">
                 Your symptom analyses will appear here once you start using the analyzer.
               </p>
-              <Button onClick={() => document.querySelector('[value="analyzer"]')?.dispatchEvent(new Event('click', { bubbles: true }))}>
+              <Button onClick={() => {
+                const analyzerTab = document.querySelector('[value="analyzer"]') as HTMLElement;
+                if (analyzerTab) analyzerTab.click();
+              }}>
                 Start First Analysis
               </Button>
             </CardContent>

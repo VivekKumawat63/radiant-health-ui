@@ -21,6 +21,7 @@ import DietTracker from "@/pages/DietTracker";
 import WellnessReminders from "@/pages/WellnessReminders";
 import HealthClassifier from "@/pages/HealthClassifier";
 import Settings from "@/pages/Settings";
+import Notifications from "@/pages/Notifications";
 import NotFound from "@/pages/NotFound";
 import DoctorRegister from "@/pages/DoctorRegister";
 import DoctorVerificationStatus from "@/pages/DoctorVerificationStatus";
@@ -57,6 +58,7 @@ const App = () => (
                 <Route path="diet" element={<DietTracker />} />
                 <Route path="wellness" element={<WellnessReminders />} />
                 <Route path="classifier" element={<HealthClassifier />} />
+                <Route path="notifications" element={<Notifications />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
             </Route>

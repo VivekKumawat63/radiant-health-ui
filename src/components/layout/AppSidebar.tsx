@@ -31,7 +31,7 @@ import {
 import { NavLink } from "react-router-dom";
 
 const navigationItems = [
-  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: Home },
   { title: "Medical History", url: "/medical-history", icon: FileText },
   { title: "Health Quiz", url: "/health-quiz", icon: HelpCircle },
   { title: "AI Insights", url: "/ai-insights", icon: Brain },
@@ -70,7 +70,7 @@ export function AppSidebar() {
       </div>
 
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup defaultOpen={true}>
           <SidebarGroupLabel>Health Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -98,7 +98,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
+        <SidebarGroup defaultOpen={true}>
           <SidebarGroupLabel>Preferences</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

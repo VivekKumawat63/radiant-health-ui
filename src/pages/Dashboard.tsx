@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const { data: healthMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['healthMetrics', user?.id],
@@ -59,10 +61,10 @@ export default function Dashboard() {
   });
 
   const quickActions = [
-    { title: "Schedule Appointment", icon: Calendar, color: "primary" },
-    { title: "View Medical Records", icon: FileText, color: "secondary" },
-    { title: "Take Health Quiz", icon: Activity, color: "warning" },
-    { title: "AI Health Analysis", icon: TrendingUp, color: "success" },
+    { title: "Schedule Appointment", icon: Calendar, color: "primary", path: "/doctors" },
+    { title: "View Medical Records", icon: FileText, color: "secondary", path: "/medical-history" },
+    { title: "Take Health Quiz", icon: Activity, color: "warning", path: "/health-quiz" },
+    { title: "AI Health Analysis", icon: TrendingUp, color: "success", path: "/ai-insights" },
   ];
 
   return (
@@ -75,10 +77,18 @@ export default function Dashboard() {
             Your health journey continues. Here's your daily health overview and personalized insights.
           </p>
           <div className="mt-6 flex gap-4">
-            <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30" variant="secondary">
+            <Button 
+              className="bg-white/20 hover:bg-white/30 text-white border-white/30" 
+              variant="secondary"
+              onClick={() => navigate('/ai-insights')}
+            >
               View Health Report
             </Button>
-            <Button className="border-white/30 text-white hover:bg-white/10" variant="outline">
+            <Button 
+              className="border-white/30 text-white hover:bg-white/10" 
+              variant="outline"
+              onClick={() => navigate('/doctors')}
+            >
               Schedule Checkup
             </Button>
           </div>
@@ -131,6 +141,7 @@ export default function Dashboard() {
                   key={index}
                   className="h-20 flex-col gap-2 hover:shadow-soft transition-all duration-200"
                   variant="outline"
+                  onClick={() => navigate(action.path)}
                 >
                   <action.icon className="w-6 h-6" />
                   <span className="text-xs text-center">{action.title}</span>
@@ -211,20 +222,20 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-center">
-              <div className="text-4xl font-bold text-success mb-2">92%</div>
-              <p className="text-sm text-muted-foreground mb-4">Excellent Health</p>
+              <div className="text-4xl font-bold text-muted-foreground mb-2">0%</div>
+              <p className="text-sm text-muted-foreground mb-4">Start tracking your health</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span>Physical</span>
-                  <span className="text-success">95%</span>
+                  <span className="text-muted-foreground">0%</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span>Mental</span>
-                  <span className="text-success">88%</span>
+                  <span className="text-muted-foreground">0%</span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span>Lifestyle</span>
-                  <span className="text-warning">85%</span>
+                  <span className="text-muted-foreground">0%</span>
                 </div>
               </div>
             </div>
